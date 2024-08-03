@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>☕️ Coffee Water Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        input[type="number"] {
+            width: 100px;
+        }
+        .result {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        h1 { color: #34495e; }
+    </style>
+</head>
+<body>
+    <h1>☕️ Coffee Water Calculator</h1>
+
+    <div class="input-group">
+        <h3>To Coffee:</h3>
+        <label>Water (grams): <input type="number" id="waterInput" step="1"></label>
+        <button onclick="calculateCoffee()">Calculate Coffee</button>
+        <p>You need <span id="coffeeResult" class="result">0</span> grams of coffee.</p>
+    </div>
+
+    <div class="input-group">
+        <h3>To Water:</h3>
+        <label>Coffee (grams): <input type="number" id="coffeeInput" step="0.1"></label>
+        <button onclick="calculateWater()">Calculate Water</button>
+        <p>You need <span id="waterResult" class="result">0</span> grams of water.</p>
+    </div>
+
+    <script>
+        const ratio = 0.06;
+
+        function calculateCoffee() {
+            const water = parseFloat(document.getElementById("waterInput").value);
+            const coffee = water * ratio;
+            document.getElementById("coffeeResult").textContent = coffee.toFixed(1);
+        }
+
+        function calculateWater() {
+            const coffee = parseFloat(document.getElementById("coffeeInput").value);
+            const water = coffee / ratio;
+            document.getElementById("waterResult").textContent = water.toFixed(1);
+        }
+    </script>
+</body>
+</html>
