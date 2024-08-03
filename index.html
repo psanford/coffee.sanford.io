@@ -2,61 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>☕️ Coffee Water Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>☕️ Perfect Coffee Calculator</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap');
+
+        :root {
+            --dark-coffee: #3C2A21;
+            --medium-coffee: #6F4E37;
+            --light-paper: #FFF8E7;
+            --cream: #FFFBF0;
+            --dark-text: #2C231C;
+            --accent: #A0522D;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 20px auto;
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--cream);
+            color: var(--dark-text);
+            margin: 0;
             padding: 20px;
-            background-color: #f0f0f0;
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
         }
-        .input-group {
-            margin-bottom: 15px;
+
+        .container {
             background-color: white;
-            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 30px;
+            width: 90%;
+            max-width: 520px;
+        }
+
+        h1 {
+            color: var(--dark-coffee);
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            background-color: var(--light-paper);
+            border: 1px solid #E0D5C1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-coffee);
+        }
+
+        input {
+            width: calc(100% - 20px);
+            padding: 12px;
+            border: 2px solid var(--medium-coffee);
+            background: white;
             border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
         }
-        input[type="number"] {
-            width: 100px;
+
+        button {
+            background-color: var(--dark-coffee);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+            width: 100%;
         }
+
+        button:hover {
+            background-color: var(--accent);
+        }
+
         .result {
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--medium-coffee);
+            font-size: 1.2rem;
+            background-color: rgba(255,255,255,0.8);
+            padding: 5px;
+            border-radius: 4px;
         }
-        h1 { color: #34495e; }
+
     </style>
 </head>
 <body>
-    <h1>☕️ Coffee Water Calculator</h1>
+    <div class="container">
+        <h1>☕️ Perfect Coffee</h1>
+        
+        <div class="input-group">
+            <label for="waterInput">Water amount (grams):</label>
+            <input type="number" id="waterInput" placeholder="Enter water weight" min="0">
+            <button onclick="calculate('water')">Calculate Coffee Amount</button>
+            <p>You need <span id="coffeeResult" class="result">0</span> grams of coffee.</p>
+        </div>
 
-    <div class="input-group">
-        <h3>To Coffee:</h3>
-        <label>Water (grams): <input type="number" id="waterInput" step="1"></label>
-        <button onclick="calculateCoffee()">Calculate Coffee</button>
-        <p>You need <span id="coffeeResult" class="result">0</span> grams of coffee.</p>
-    </div>
-
-    <div class="input-group">
-        <h3>To Water:</h3>
-        <label>Coffee (grams): <input type="number" id="coffeeInput" step="0.1"></label>
-        <button onclick="calculateWater()">Calculate Water</button>
-        <p>You need <span id="waterResult" class="result">0</span> grams of water.</p>
+        <div class="input-group">
+            <label for="coffeeInput">Coffee amount (grams):</label>
+            <input type="number" id="coffeeInput" placeholder="Enter coffee weight" min="0">
+            <button onclick="calculate('coffee')">Calculate Water Amount</button>
+            <p>You need <span id="waterResult" class="result">0</span> grams of water.</p>
+        </div>
     </div>
 
     <script>
-        const ratio = 0.06;
+        const RATIO = 0.06;
+        function calculate(type) {
+            const coffeeInput = document.getElementById("coffeeInput");
+            const waterInput = document.getElementById("waterInput");
+            const coffeeResult = document.getElementById("coffeeResult");
+            const waterResult = document.getElementById("waterResult");
 
-        function calculateCoffee() {
-            const water = parseFloat(document.getElementById("waterInput").value);
-            const coffee = water * ratio;
-            document.getElementById("coffeeResult").textContent = coffee.toFixed(1);
-        }
-
-        function calculateWater() {
-            const coffee = parseFloat(document.getElementById("coffeeInput").value);
-            const water = coffee / ratio;
-            document.getElementById("waterResult").textContent = water.toFixed(1);
+            if (type === "water") {
+                const water = Math.max(0, parseFloat(waterInput.value) || 0);
+                const coffee = water * RATIO;
+                coffeeResult.textContent = coffee.toFixed(1);
+            } else {
+                const coffee = Math.max(0, parseFloat(coffeeInput.value) || 0);
+                const water = coffee / RATIO;
+                waterResult.textContent = water.toFixed(0);
+            }
         }
     </script>
 </body>
