@@ -35,14 +35,7 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             padding: 30px;
             width: 90%;
-            max-width: 520px;
-        }
-
-        h1 {
-            color: var(--dark-coffee);
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
+            max-width: 480px;
         }
 
         .input-group {
@@ -60,26 +53,26 @@
             color: var(--dark-coffee);
         }
 
-        input {
-            width: calc(100% - 20px);
-            padding: 12px;
-            border: 2px solid var(--medium-coffee);
-            background: white;
+        input, button {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
             border-radius: 5px;
             margin-bottom: 10px;
             font-size: 16px;
+        }
+
+        input {
+            border: 2px solid var(--medium-coffee);
         }
 
         button {
             background-color: var(--dark-coffee);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
             cursor: pointer;
             transition: 0.2s;
             font-weight: bold;
-            width: 100%;
         }
 
         button:hover {
@@ -90,16 +83,12 @@
             font-weight: bold;
             color: var(--medium-coffee);
             font-size: 1.2rem;
-            background-color: rgba(255,255,255,0.8);
-            padding: 5px;
-            border-radius: 4px;
         }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>☕️ Perfect Coffee</h1>
+        <h1 style="text-align:center; color: var(--dark-coffee);">☕️ Perfect Coffee</h1>
         
         <div class="input-group">
             <label for="waterInput">Water amount (grams):</label>
