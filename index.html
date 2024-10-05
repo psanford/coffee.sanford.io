@@ -27,6 +27,7 @@
             min-height: 100vh;
             justify-content: center;
             align-items: center;
+            overflow-x: hidden;
         }
 
         .container {
@@ -36,6 +37,7 @@
             padding: 30px;
             width: 90%;
             max-width: 480px;
+            position: relative;
         }
 
         .input-group {
@@ -44,6 +46,13 @@
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 15px;
+        }
+
+        .ice-details {
+            font-size: 0.9rem;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--medium-coffee);
         }
 
         label {
@@ -84,17 +93,127 @@
             color: var(--medium-coffee);
             font-size: 1.2rem;
         }
+
+        /* Settings Panel Styles */
+        .settings-toggle {
+            position: absolute;
+            right: -40px;
+            top: 20px;
+            background: var(--dark-coffee);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 600px) {
+            .settings-toggle {
+                right: 20px;
+                top: -40px;
+                border-radius: 5px 5px 0 0;
+            }
+        }
+
+        .backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            z-index: 900;
+        }
+
+        .backdrop.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .settings-panel {
+            position: fixed;
+            right: -300px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            transition: right 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .settings-panel.open {
+            right: 0;
+        }
+
+        .settings-panel h2 {
+            color: var(--dark-coffee);
+            margin-top: 0;
+        }
+
+        .settings-group {
+            margin-bottom: 20px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .ratio-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ratio-input input {
+            width: 80px;
+            margin: 0;
+        }
+
+        .close-settings {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            width: auto;
+        }
     </style>
 </head>
 <body>
+    <div class="backdrop" id="backdrop" onclick="closeSettings()"></div>
     <div class="container">
         <h1 style="text-align:center; color: var(--dark-coffee);">☕️ Perfect Coffee</h1>
-        
+
         <div class="input-group">
             <label for="waterInput">Water amount (grams):</label>
             <input type="number" id="waterInput" placeholder="Enter water weight" min="0">
             <button onclick="calculate('water')">Calculate Coffee Amount</button>
             <p>You need <span id="coffeeResult" class="result">0</span> grams of coffee.</p>
+            <div id="waterIceDetails" class="ice-details" style="display: none;">
+                For brewing: <span id="brewingWater" class="result">0</span>g water<br>
+                Ice: <span id="iceAmount" class="result">0</span>g
+            </div>
         </div>
 
         <div class="input-group">
@@ -102,27 +221,122 @@
             <input type="number" id="coffeeInput" placeholder="Enter coffee weight" min="0">
             <button onclick="calculate('coffee')">Calculate Water Amount</button>
             <p>You need <span id="waterResult" class="result">0</span> grams of water.</p>
+            <div id="coffeeIceDetails" class="ice-details" style="display: none;">
+                For brewing: <span id="brewingWaterReverse" class="result">0</span>g water<br>
+                Ice: <span id="iceAmountReverse" class="result">0</span>g
+            </div>
+        </div>
+
+        <button class="settings-toggle" onclick="toggleSettings()">⚙️</button>
+    </div>
+
+    <div class="settings-panel" id="settingsPanel">
+        <button class="close-settings" onclick="closeSettings()">×</button>
+        <h2>Settings</h2>
+
+        <div class="settings-group">
+            <label>Coffee Ratio</label>
+            <div class="ratio-input">
+                <input type="number" id="ratioInput" value="60" min="1" max="100">
+                <span>g per 1000g water</span>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="icedCoffee">
+                <label for="icedCoffee">Iced Coffee</label>
+            </div>
         </div>
     </div>
 
     <script>
-        const RATIO = 0.06;
+        let currentRatio = 0.06;
+
+        function updateRatio() {
+            const ratioInput = document.getElementById('ratioInput');
+            const isIced = document.getElementById('icedCoffee').checked;
+
+            if (isIced) {
+                ratioInput.value = '65';
+            }
+
+            currentRatio = parseFloat(ratioInput.value) / 1000;
+
+            // Recalculate based on any existing inputs
+            if (document.getElementById('waterInput').value) {
+                calculate('water');
+            }
+            if (document.getElementById('coffeeInput').value) {
+                calculate('coffee');
+            }
+        }
+
         function calculate(type) {
             const coffeeInput = document.getElementById("coffeeInput");
             const waterInput = document.getElementById("waterInput");
             const coffeeResult = document.getElementById("coffeeResult");
             const waterResult = document.getElementById("waterResult");
+            const isIced = document.getElementById('icedCoffee').checked;
 
             if (type === "water") {
                 const water = Math.max(0, parseFloat(waterInput.value) || 0);
-                const coffee = water * RATIO;
+                const coffee = water * currentRatio;
                 coffeeResult.textContent = coffee.toFixed(1);
+
+                if (isIced) {
+                    const iceAmount = water * 0.4;
+                    const brewingWater = water * 0.6;
+                    document.getElementById('waterIceDetails').style.display = 'block';
+                    document.getElementById('brewingWater').textContent = brewingWater.toFixed(0);
+                    document.getElementById('iceAmount').textContent = iceAmount.toFixed(0);
+                } else {
+                    document.getElementById('waterIceDetails').style.display = 'none';
+                }
             } else {
                 const coffee = Math.max(0, parseFloat(coffeeInput.value) || 0);
-                const water = coffee / RATIO;
+                const water = coffee / currentRatio;
                 waterResult.textContent = water.toFixed(0);
+
+                if (isIced) {
+                    const iceAmount = water * 0.4;
+                    const brewingWater = water * 0.6;
+                    document.getElementById('coffeeIceDetails').style.display = 'block';
+                    document.getElementById('brewingWaterReverse').textContent = brewingWater.toFixed(0);
+                    document.getElementById('iceAmountReverse').textContent = iceAmount.toFixed(0);
+                } else {
+                    document.getElementById('coffeeIceDetails').style.display = 'none';
+                }
             }
         }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            const backdrop = document.getElementById('backdrop');
+            panel.classList.toggle('open');
+            backdrop.classList.toggle('visible');
+        }
+
+        function closeSettings() {
+            const panel = document.getElementById('settingsPanel');
+            const backdrop = document.getElementById('backdrop');
+            panel.classList.remove('open');
+            backdrop.classList.remove('visible');
+        }
+
+        // Event listeners
+        document.getElementById('ratioInput').addEventListener('change', updateRatio);
+        document.getElementById('icedCoffee').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('ratioInput').value = '65';
+            } else {
+                document.getElementById('ratioInput').value = '60';
+            }
+            updateRatio();
+        });
+
+        // Initialize
+        updateRatio();
     </script>
 </body>
 </html>
